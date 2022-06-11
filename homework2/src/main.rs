@@ -16,7 +16,7 @@ fn main() {
 
     // Count
     for word in contents.split_whitespace() {
-        if input_word.trim() == word.to_string() {
+        if input_word.trim().to_lowercase() == word.to_string().to_lowercase() {
             counter += 1;
         }
     }
