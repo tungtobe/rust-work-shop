@@ -74,29 +74,29 @@ fn main() {
     println!("Hello world!")
 }
 
-pub struct School {
-    students: HashMap<String, u32>,
+pub struct School<T> {
+    pub students: HashMap<String, T>,
 }
 
-impl School {
-    pub fn new() -> School {
-        School {
+impl<T: Clone + Ord + PartialEq> School<T> {
+    pub fn new() -> Self {
+        Self {
             students: HashMap::new(),
         }
     }
 
-    pub fn add(&mut self, grade: u32, student: &str) {
+    pub fn add(&mut self, grade: T, student: &str) {
         self.students.entry(student.to_string()).or_insert(grade);
     }
 
-    pub fn grades(&self) -> Vec<u32> {
-        let mut grades: Vec<u32> = self.students.clone().into_values().collect::<Vec<u32>>();
+    pub fn grades(&self) -> Vec<T> {
+        let mut grades: Vec<T> = self.students.clone().into_values().collect::<Vec<T>>();
         grades.sort_unstable();
         grades.dedup();
         grades
     }
 
-    pub fn grade(&self, grade: u32) -> Vec<String> {
+    pub fn grade(&self, grade: T) -> Vec<String> {
         let mut students_list = self
             .students
             .iter()
@@ -119,17 +119,22 @@ mod tests {
 
     #[test]
     fn new_school_have_no_student() {
-        let school = School::new();
+        let school: School<String> = School::new();
         assert!(school.students.is_empty() == true);
     }
-
     #[test]
     fn insert_student_to_school() {
-        let mut school = School::new();
+        let mut school1 = School::new();
         let student_a_name = String::from("Lee");
         let student_a_grade = 2;
-        school.add(student_a_grade, &student_a_name);
-        assert!(*school.students.get(&student_a_name).unwrap() == student_a_grade);
+        school1.add(student_a_grade, &student_a_name);
+        assert!(*school1.students.get(&student_a_name).unwrap() == student_a_grade);
+
+        let mut school2 = School::new();
+        let student_b_name = String::from("Anni");
+        let student_b_grade = "A1".to_string();
+        school2.add(&student_b_grade, &student_b_name);
+        assert!(*school2.students.get(&student_b_name).unwrap() == &student_b_grade);
     }
 
     #[test]
@@ -148,7 +153,7 @@ mod tests {
     }
 
     #[test]
-    fn get_student_with_same_grade() {
+    fn get_student_with_same_grade_i32() {
         let mut school = School::new();
         let student_a_name = String::from("Lee");
         let student_b_name = String::from("Nancy");
@@ -156,6 +161,21 @@ mod tests {
         let student_a_grade = 2;
         let student_b_grade = 3;
         let student_c_grade = 3;
+        school.add(student_a_grade, &student_a_name);
+        school.add(student_b_grade, &student_b_name);
+        school.add(student_c_grade, &student_c_name);
+        assert!(school.grade(student_b_grade) == vec!["Alice", "Nancy"]);
+    }
+
+    #[test]
+    fn get_student_with_same_grade_string() {
+        let mut school = School::new();
+        let student_a_name = String::from("Lee");
+        let student_b_name = String::from("Nancy");
+        let student_c_name = String::from("Alice");
+        let student_a_grade = "A1";
+        let student_b_grade = "A2";
+        let student_c_grade = "A2";
         school.add(student_a_grade, &student_a_name);
         school.add(student_b_grade, &student_b_name);
         school.add(student_c_grade, &student_c_name);
